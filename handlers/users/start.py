@@ -19,7 +19,8 @@ async def bot_start(message: types.Message):
         await message.answer(main_text)
         # Надсилання повідомлення усім операторам зі списку
         for admin in ADMINS:
-            await dp.bot.send_message(admin, f'Користувач, {message.from_user.full_name}, потребує підтримки.\nid: <i>{message.from_user.id}</i>',
+            await dp.bot.send_message(admin,
+                                      f'Користувач, {message.from_user.full_name}, потребує підтримки.\nid: <i>{message.from_user.id}</i>',
                                       reply_markup=answer, parse_mode="html")
 
 
@@ -27,21 +28,20 @@ async def bot_start(message: types.Message):
 async def confirm_support(call: CallbackQuery, state: FSMContext):
     current_user = re.findall('\d+', f"{call.message.text}")[0]
     if await curent_user(current_user):
-        await support.ADMINS0.set()
+        await support.in_call.set()
         current_admin = call.message.chat.id
-        await state.update_data({'user' : current_user,
+        await state.update_data({'user': current_user,
                                  'admin': current_admin})
 
         data_admin = await state.get_data()
         user = data_admin.get('user')
 
         user_state = dp.current_state(chat=user, user=user)
-        await user_state.set_state(state=support.ADMINS0)
+        await user_state.set_state(state=support.in_call)
         await user_state.update_data(data_user_id=user)
 
-        data_user = await user_state.update_data({'user' : current_user,
-                                 'admin': current_admin})
-
+        data_user = await user_state.update_data({'user': current_user,
+                                                  'admin': current_admin})
 
         await call.answer(cache_time=10)
         await call.message.edit_reply_markup(stop)
@@ -52,7 +52,7 @@ async def confirm_support(call: CallbackQuery, state: FSMContext):
         await call.message.answer("Користувач вже підключений до іншого оператора.")
 
 
-@dp.callback_query_handler(text='stop', state=support.ADMINS0)
+@dp.callback_query_handler(text='stop', state=support.in_call)
 async def cansel_support_0(call: CallbackQuery, state: FSMContext):
     admin_data = await state.get_data()
     user = admin_data.get('user')
@@ -71,7 +71,7 @@ async def cansel_support_0(call: CallbackQuery, state: FSMContext):
     await user_state.finish()
 
 
-@dp.message_handler(state=support.ADMINS0, content_types=types.ContentType.ANY)
+@dp.message_handler(state=support.in_call, content_types=types.ContentType.ANY)
 async def support_call_0(message: types.message, state: FSMContext):
     admin_data = await state.get_data()
     user = admin_data.get('user')
