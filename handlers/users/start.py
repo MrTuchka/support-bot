@@ -48,8 +48,7 @@ async def confirm_support(call: CallbackQuery, state: FSMContext):
         await call.message.answer("Ви на зв'язку з користувачем.")
         await dp.bot.send_message(user, 'Адміністратор підключився до розмови.')
     else:
-        await call.answer(cache_time=10)
-        await call.message.answer("Користувач вже підключений до іншого оператора.")
+        await call.answer(text="Користувач вже підключений до іншого оператора", show_alert=True)
 
 
 @dp.callback_query_handler(text='stop', state=support.in_call)
