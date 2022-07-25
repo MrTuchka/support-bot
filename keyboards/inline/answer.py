@@ -10,12 +10,12 @@ answer = InlineKeyboardMarkup(row_width=2,
                                      ]
                                  ])
 
-stop = InlineKeyboardMarkup(row_width=2,
+stop = InlineKeyboardMarkup(row_width=2, one_time_keyboard=True,
                                  inline_keyboard=[
                                      [
                                          InlineKeyboardButton(
                                              text="Завершити бесіду",
-                                             callback_data="stop"
+                                             callback_data="stop",
                                          ),
                                      ]
                                  ])

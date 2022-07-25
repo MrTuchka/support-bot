@@ -54,36 +54,56 @@ async def confirm_support(call: CallbackQuery, state: FSMContext):
 
 @dp.callback_query_handler(text='stop', state=support.in_call)
 async def cansel_support_0(call: CallbackQuery, state: FSMContext):
-    admin_data = await state.get_data()
-    user = admin_data.get('user')
+    try:
+        admin_data = await state.get_data()
+        user = admin_data.get('user')
 
-    user_state = dp.current_state(chat=user, user=user)
+        user_state = dp.current_state(chat=user, user=user)
 
-    user_data = await user_state.get_data()
-    admin = user_data.get('admin')
+        user_data = await user_state.get_data()
+        admin = user_data.get('admin')
 
-    await call.answer(cache_time=10)
-    await call.message.edit_reply_markup(None)
-    await dp.bot.send_message(user, 'Адміністратор завершив бесіду')
+        await call.answer(cache_time=10)
+        await call.message.edit_reply_markup(None)
+        await dp.bot.send_message(user, 'Адміністратор завершив бесіду')
+        await call.message.answer('Ви завершили бесіду')
+        user_state = dp.current_state(chat=user, user=user)
+        await state.finish()
+        await user_state.finish()
+    except:
+        await call.message.answer('Ви завершили бесіду')
+
+
+@dp.callback_query_handler(text='stop')
+async def cansel_support_without_state(call: CallbackQuery):
     await call.message.answer('Ви завершили бесіду')
-    user_state = dp.current_state(chat=user, user=user)
-    await state.finish()
-    await user_state.finish()
+    await call.message.edit_reply_markup(None)
 
 
 @dp.message_handler(state=support.in_call, content_types=types.ContentType.ANY)
 async def support_call_0(message: types.message, state: FSMContext):
-    admin_data = await state.get_data()
-    user = admin_data.get('user')
+    try:
+        admin_data = await state.get_data()
+        user = admin_data.get('user')
 
-    user_state = dp.current_state(chat=user, user=user)
-    current_state = await user_state.get_state()
+        user_state = dp.current_state(chat=user, user=user)
+        current_state = await user_state.get_state()
 
-    user_data = await user_state.get_data()
-    admin = user_data.get('admin')
+        user_data = await user_state.get_data()
+        admin = user_data.get('admin')
 
-    if current_state == 'support:ADMINS0':
-        if message.from_user.id != admin:
-            await message.copy_to(admin)
-        elif message.from_user.id == admin:
-            await message.copy_to(user)
+        if current_state == 'support:in_call':
+            if message.from_user.id != admin:
+                await message.copy_to(admin)
+            elif message.from_user.id == admin:
+                await message.copy_to(user)
+    except:
+        admin_data = await state.get_data()
+        user = admin_data.get('user')
+
+        user_state = dp.current_state(chat=user, user=user)
+
+        user_data = await user_state.get_data()
+        admin = user_data.get('admin')
+        await dp.bot.send_message(admin, 'Користувач заблокував бота.')
+        await state.finish()
