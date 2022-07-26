@@ -1,1 +1,1 @@
-from . import dpconfig
+from . import dbconfig

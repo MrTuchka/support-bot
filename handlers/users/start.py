@@ -3,20 +3,27 @@ from aiogram import types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.builtin import CommandStart
 from aiogram.types import CallbackQuery
-from utils.cheks import is_operator, curent_user
+from utils.cheks import is_operator, curent_state
 from data.config import ADMINS
 from states.support import support
 from keyboards.inline.answer import answer, stop
 from loader import dp
+from utils.db_api.dbconfig import chek, create_user, add_statistics
 
 
 @dp.message_handler(CommandStart())
 async def bot_start(message: types.Message):
     if not is_operator(message.from_user.id):
+        add_statistics()
+        if chek(message.from_user.id) == False:
+            create_user(message.from_user.id, message.from_user.full_name, message.from_user.username)
 
         main_text = f"Доброго дня, {message.from_user.full_name}!\n" \
                     f"Наш оператор служби підтримки вже підключається до розмови."
         await message.answer(main_text)
+
+        user_state = dp.current_state(chat=message.from_user.id, user=message.from_user.id)
+        await user_state.set_state(state=support.ready_to_call)
         # Надсилання повідомлення усім операторам зі списку
         for admin in ADMINS:
             await dp.bot.send_message(admin,
@@ -27,7 +34,7 @@ async def bot_start(message: types.Message):
 @dp.callback_query_handler(text='yes')
 async def confirm_support(call: CallbackQuery, state: FSMContext):
     current_user = re.findall('\d+', f"{call.message.text}")[0]
-    if await curent_user(current_user):
+    if await curent_state(current_user) == 'support:ready_to_call':
         await support.in_call.set()
         current_admin = call.message.chat.id
         await state.update_data({'user': current_user,
@@ -48,7 +55,8 @@ async def confirm_support(call: CallbackQuery, state: FSMContext):
         await call.message.answer("Ви на зв'язку з користувачем.")
         await dp.bot.send_message(user, 'Адміністратор підключився до розмови.')
     else:
-        await call.answer(text="Користувач вже підключений до іншого оператора", show_alert=True)
+        await call.answer(text="Користувач підключений до іншого оператора або вже завершив спілкування.", show_alert=True)
+        await call.message.delete_reply_markup()
 
 
 @dp.callback_query_handler(text='stop', state=support.in_call)
@@ -84,14 +92,12 @@ async def support_call_0(message: types.message, state: FSMContext):
     try:
         admin_data = await state.get_data()
         user = admin_data.get('user')
-
         user_state = dp.current_state(chat=user, user=user)
-        current_state = await user_state.get_state()
 
         user_data = await user_state.get_data()
         admin = user_data.get('admin')
 
-        if current_state == 'support:in_call':
+        if await curent_state(user) == 'support:in_call':
             if message.from_user.id != admin:
                 await message.copy_to(admin)
             elif message.from_user.id == admin:

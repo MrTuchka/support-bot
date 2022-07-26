@@ -6,7 +6,7 @@ def is_operator(id):
     return len([operator for operator in ADMINS if id == int(operator)])
 
 #Перевірка State у юзерів
-async def curent_user(user):
+async def curent_state(user):
     user_state = dp.current_state(chat=user, user=user)
     curent_state = await user_state.get_state()
-    return curent_state is None
+    return curent_state

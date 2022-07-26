@@ -9,6 +9,26 @@ firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
+def add_statistics():
+    statistics = db.collection(u'users').document(u"statistic")
+    launches = statistics.get().to_dict()['number of launches']
+    launches += 1;
+    statistics.set({
+        u'number of launches': launches,
+    })
+
+
+def chek(user_id):
+    user = str(user_id)
+    users_ref = db.collection(u'users').document(user)
+    user_name = users_ref.get()
+    try:
+        name = user_name.to_dict()['name']
+    except:
+        name = 'No name'
+    return name != "No name"
+
+
 def get_name(user_id):
     user = str(user_id)
     users_ref = db.collection(u'users').document(user)
