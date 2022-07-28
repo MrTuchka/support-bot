@@ -9,16 +9,17 @@ firebase_admin.initialize_app(cred)
 
 db = firestore.client()
 
-def add_statistics():
-    statistics = db.collection(u'users').document(u"statistic")
-    launches = statistics.get().to_dict()['number of launches']
+
+async def add_statistics():
+    statistics = db.collection(u'statistic').document(u"SidisTestsBot")
+    launches = statistics.get().to_dict()['number_of_launches']
     launches += 1;
     statistics.set({
-        u'number of launches': launches,
+        u'number_of_launches': launches,
     })
 
 
-def chek(user_id):
+async def chek(user_id):
     user = str(user_id)
     users_ref = db.collection(u'users').document(user)
     user_name = users_ref.get()
@@ -29,7 +30,7 @@ def chek(user_id):
     return name != "No name"
 
 
-def get_name(user_id):
+async def get_name(user_id):
     user = str(user_id)
     users_ref = db.collection(u'users').document(user)
     user_name = users_ref.get()
@@ -39,7 +40,18 @@ def get_name(user_id):
         name = 'No name'
     return name
 
-def get_phone(user_id):
+
+async def get(bot_name, collection, field):
+    bot_ref = db.collection(str(collection)).document(str(bot_name))
+    data = bot_ref.get()
+    try:
+        current_field = data.to_dict()[str(field)]
+    except:
+        current_field = 'No data'
+    return current_field
+
+
+async def get_phone(user_id):
     user = str(user_id)
     users_ref = db.collection(u'users').document(user)
     user_name = users_ref.get()
@@ -49,9 +61,14 @@ def get_phone(user_id):
         phone = 'No phone'
     return phone
 
-def create_user(id, full_name, username):
+
+async def create_user(id, full_name, username):
     doc_ref = db.collection(u'users').document(str(id))
     doc_ref.set({
         u'name': str(full_name),
         u'username': str(username),
     })
+
+
+async def get_all_users():
+    all_users = db.collection(u'users')

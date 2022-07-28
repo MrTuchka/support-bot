@@ -9,17 +9,18 @@ from states.support import support
 from keyboards.inline.answer import answer, stop
 from loader import dp
 from utils.db_api.dbconfig import chek, create_user, add_statistics
+from utils.db_api.environments_for_db import db
 
 
 @dp.message_handler(CommandStart())
 async def bot_start(message: types.Message):
     if not is_operator(message.from_user.id):
-        add_statistics()
-        if chek(message.from_user.id) == False:
-            create_user(message.from_user.id, message.from_user.full_name, message.from_user.username)
+        await add_statistics()
+        if await chek(message.from_user.id) == False:
+            await create_user(message.from_user.id, message.from_user.full_name, message.from_user.username)\
 
-        main_text = f"Доброго дня, {message.from_user.full_name}!\n" \
-                    f"Наш оператор служби підтримки вже підключається до розмови."
+        main_text = db.get('greetings_text')
+        main_text = main_text.replace("{username}", message.from_user.full_name)
         await message.answer(main_text)
 
         user_state = dp.current_state(chat=message.from_user.id, user=message.from_user.id)
@@ -53,7 +54,7 @@ async def confirm_support(call: CallbackQuery, state: FSMContext):
         await call.answer(cache_time=10)
         await call.message.edit_reply_markup(stop)
         await call.message.answer("Ви на зв'язку з користувачем.")
-        await dp.bot.send_message(user, 'Адміністратор підключився до розмови.')
+        await dp.bot.send_message(user, db.get('start_chat_text'))
     else:
         await call.answer(text="Користувач підключений до іншого оператора або вже завершив спілкування.", show_alert=True)
         await call.message.delete_reply_markup()
@@ -72,7 +73,7 @@ async def cansel_support_0(call: CallbackQuery, state: FSMContext):
 
         await call.answer(cache_time=10)
         await call.message.edit_reply_markup(None)
-        await dp.bot.send_message(user, 'Адміністратор завершив бесіду')
+        await dp.bot.send_message(user, 'Ви завершили бесіду')
         await call.message.answer('Ви завершили бесіду')
         user_state = dp.current_state(chat=user, user=user)
         await state.finish()
