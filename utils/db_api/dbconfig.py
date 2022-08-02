@@ -71,4 +71,9 @@ async def create_user(id, full_name, username):
 
 
 async def get_all_users():
-    all_users = db.collection(u'users')
+    docs = db.collection(u'users').stream()
+    all_users = []
+
+    for user in docs:
+        all_users.append(user.id)
+    return all_users
