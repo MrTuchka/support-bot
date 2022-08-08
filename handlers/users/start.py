@@ -73,7 +73,7 @@ async def cansel_support_0(call: CallbackQuery, state: FSMContext):
 
         await call.answer(cache_time=10)
         await call.message.edit_reply_markup(None)
-        await dp.bot.send_message(user, 'Ви завершили бесіду')
+        await dp.bot.send_message(user, db.get('stop_text'))
         await call.message.answer('Ви завершили бесіду')
         user_state = dp.current_state(chat=user, user=user)
         await state.finish()
