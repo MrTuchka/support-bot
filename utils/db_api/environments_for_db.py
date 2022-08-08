@@ -16,7 +16,7 @@ async def get_db():
     db['stop_text'] = stop_text
 
     start_chat_text = await get('SidisTestsBot', 'setup', 'start_chat_text')
-    db['stop_text'] = start_chat_text
+    db['start_chat_text'] = start_chat_text
 
 
 
