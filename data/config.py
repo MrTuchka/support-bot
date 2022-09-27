@@ -4,12 +4,10 @@ from environs import Env
 env = Env()
 env.read_env()
 
-BOT_TOKEN = "5723874330:AAEzSncJrJRGxm7l-0vnZrzZz87LV3mU_ZA"
-ADMINS = [178875921]
-IP = 'localhost'
-# BOT_TOKEN = env.str("BOT_TOKEN")  # Забираем значение типа str
-# ADMINS = env.list("ADMINS")  # Тут у нас будет список из админов
-# IP = env.str("ip")  # Тоже str, но для айпи адреса хоста
+BOT_TOKEN = env.str("BOT_TOKEN")  # Забираем значение типа str
+ADMINS = env.list("ADMINS")  # Тут у нас будет список из админов
+IP = env.str("ip")  # Тоже str, но для айпи адреса хоста
+WEBHOOK_URL = env.str("WEBHOOK_URL")
 
 dp_api = {
   "type": "service_account",
