@@ -35,9 +35,6 @@ async def on_startup(dispatcher):
     # Встановлюємо дефолтні команди
     await set_default_commands(dispatcher)
 
-    # Уведомляет про запуск
-    await on_startup_notify(dispatcher)
-
 
 async def on_shutdown(dispatcher):
     logging.warning('Shutting down..')
